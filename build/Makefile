@@ -1,0 +1,26 @@
+CC=gcc -fopenmp  
+SOURCES=main.c processing.c psd.c sample_gen.c
+HEADERS=defs.h processing.h psd.h sample_gen.h
+
+CFLAGS=-std=c99 -c -Wall 
+LDFLAGS=-lm -lgsl -lgslcblas -I/usr/local/include -L/usr/local/lib
+
+SRC_DIR = ../src/
+
+OBJECTS=$(SOURCES:.c=.o)
+EXECUTABLE=rp_estimation
+
+CSOURCES=$(addprefix $(SRC_DIR), $(SOURCES))
+
+all: $(CSOURCES) $(EXECUTABLE)
+	
+$(EXECUTABLE): $(OBJECTS)
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+
+%.o: $(SRC_DIR)%.c
+	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	rm *.o
+
+.PHONY: clean
