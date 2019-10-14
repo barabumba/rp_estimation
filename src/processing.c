@@ -5,9 +5,13 @@
  *      Author: mturbin
  */
 #include "defs.h"
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include "processing.h"
+#include "psd.h"
 
-
-double process_channel(double *c2, double *psd_ch_sample, double *correction_base, double q_ch, int64_t m_ch)
+double process_channel(double *c2, double *psd_ch_sample, double *correction_base, double q_ch, double m_ch)
 {
 	int64_t i;
 	double sum=0;
@@ -21,3 +25,70 @@ double process_channel(double *c2, double *psd_ch_sample, double *correction_bas
 	return sum;
 }
 
+double process_channel_gsl(double x, void *p)
+{
+	double output;
+	struct my_f_params *params = (struct my_f_params *)p;
+
+	double *psd = (double*) malloc((N/2+1)*sizeof(double));
+	psd_fill(psd, N/2+1, x);
+
+	output = process_channel(params->c2, psd, params->correction_base, params->q_ch, x);
+	free(psd);
+	return -output;
+}
+
+double find_min(gsl_function *F)
+{
+	int iter = 0, status;
+	const int max_iter = 100;
+
+	double m = M;
+	double a = m/2, b = 3*m/2;
+
+	const gsl_min_fminimizer_type *T;
+	gsl_min_fminimizer *s;
+
+	T = gsl_min_fminimizer_brent;
+	s = gsl_min_fminimizer_alloc (T);
+	gsl_min_fminimizer_set (s, F, m, a, b);
+
+	printf ("using %s method\n",
+			gsl_min_fminimizer_name (s));
+
+	printf ("%5s [%9s, %9s] %9s %10s %9s\n",
+		  "iter", "lower", "upper", "min",
+		  "err", "err(est)");
+
+	printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
+		  iter, a, b,
+		  m, b - a);
+
+	do
+	{
+	  iter++;
+	  status = gsl_min_fminimizer_iterate (s);
+
+	  m = gsl_min_fminimizer_x_minimum (s);
+	  a = gsl_min_fminimizer_x_lower (s);
+	  b = gsl_min_fminimizer_x_upper (s);
+
+	  status
+		= gsl_min_test_interval (a, b, .25, 0.0);
+
+//	  if (status == GSL_SUCCESS)
+//		printf ("Converged:\n");
+//
+//	  printf ("%5d [%.7f, %.7f] "
+//			  "%.7f %.7f\n",
+//			  iter, a, b,
+//			  m, b - a);
+	}
+	while (status == GSL_CONTINUE && iter < max_iter);
+
+	gsl_min_fminimizer_free (s);
+
+	if (status != GSL_SUCCESS)
+		printf ("Do not converged\n");
+	return m;
+}

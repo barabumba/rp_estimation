@@ -10,6 +10,6 @@
 
 double psd_function(double x);
 double psd_correction_log(double x, void *p);
-void psd_fill(double *psd_sample, int N, int M);
+void psd_fill(double *psd_sample, int n, double m);
 
 #endif /* SRC_PSD_H_ */

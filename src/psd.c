@@ -21,12 +21,12 @@ double psd_correction_log(double x, void *p)
 	return log(1.+q*psd_function(x));
 }
 
-void psd_fill(double *psd_sample, int N, int M)
+void psd_fill(double *psd_sample, int n, double m)
 {
 	/*
 	 * It is assumed that observation time T=1, so sampling rate=1/N and, hence, frequency step=1.
 	 */
 	int i;
-	for(i=0;i<N;i++)
-		psd_sample[i] = psd_function(((double)i)/M);
+	for(i=0;i<n;i++)
+		psd_sample[i] = psd_function(((double)i)/m);
 }
