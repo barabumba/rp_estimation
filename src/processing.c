@@ -44,25 +44,26 @@ double find_min(gsl_function *F)
 	const int max_iter = 100;
 
 	double m = M;
-	double a = m/2, b = 3*m/2;
+	double a = m/4, b = 4*m;
 
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
 
 	T = gsl_min_fminimizer_brent;
 	s = gsl_min_fminimizer_alloc (T);
+//	printf("%f %f %f \n", process_channel_gsl(a, F->params), process_channel_gsl(b, F->params), process_channel_gsl(m, F->params));
 	gsl_min_fminimizer_set (s, F, m, a, b);
 
-	printf ("using %s method\n",
-			gsl_min_fminimizer_name (s));
-
-	printf ("%5s [%9s, %9s] %9s %10s %9s\n",
-		  "iter", "lower", "upper", "min",
-		  "err", "err(est)");
-
-	printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
-		  iter, a, b,
-		  m, b - a);
+//	printf ("using %s method\n",
+//			gsl_min_fminimizer_name (s));
+//
+//	printf ("%5s [%9s, %9s] %9s %10s %9s\n",
+//		  "iter", "lower", "upper", "min",
+//		  "err", "err(est)");
+//
+//	printf ("%5d [%.7f, %.7f] %.7f %.7f\n",
+//		  iter, a, b,
+//		  m, b - a);
 
 	do
 	{

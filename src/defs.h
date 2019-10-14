@@ -19,8 +19,8 @@
 #define Q 1.
 
 #define M_SRCH_RANGE_LEN 0x80
-#define Q_SRCH_RANGE_LEN 0x1
+#define Q_SRCH_RANGE_LEN 0x10
 
-#define NUMBER_OF_TESTS 1
+#define NUMBER_OF_TESTS 1000000
 
 #endif /* SRC_DEFS_H_ */
