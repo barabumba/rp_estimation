@@ -44,7 +44,30 @@ double find_min(gsl_function *F)
 	const int max_iter = 100;
 
 	double m = M;
-	double a = m/4, b = 4*m;
+	double a = m/2, b = 2*m;
+
+	double f = process_channel_gsl(a, F->params);
+	double f_m = process_channel_gsl(m, F->params);
+	if(f < f_m)
+	{
+		do {
+			a /= 2;
+			m /= 2;
+			b /= 2;
+			f = process_channel_gsl(a, F->params);
+			f_m = process_channel_gsl(m, F->params);;
+		} while(f < f_m);
+	}
+	else if((f = process_channel_gsl(b, F->params)) < f_m)
+	{
+		do {
+			a *= 2;
+			m *= 2;
+			b *= 2;
+			f = process_channel_gsl(b, F->params);
+			f_m = process_channel_gsl(m, F->params);;
+		} while(f < f_m);
+	}
 
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
@@ -75,7 +98,7 @@ double find_min(gsl_function *F)
 	  b = gsl_min_fminimizer_x_upper (s);
 
 	  status
-		= gsl_min_test_interval (a, b, .25, 0.0);
+		= gsl_min_test_interval (a, b, 0.5, 0.0);
 
 //	  if (status == GSL_SUCCESS)
 //		printf ("Converged:\n");
