@@ -17,7 +17,6 @@
 #include "gsl/gsl_statistics_double.h"
 
 double q_search_values[Q_SRCH_RANGE_LEN];
-double corrections_base[Q_SRCH_RANGE_LEN];
 double bw_search_values[M_SRCH_RANGE_LEN];
 double psd_sample_true[N/2+1];
 
@@ -45,7 +44,6 @@ int main(void)
 	for(int i=0;i<Q_SRCH_RANGE_LEN;i++)
 	{
 		q_search_values[i] = (Q_SRCH_RANGE_LEN>1) ? Q/2.+i*(1.*Q/Q_SRCH_RANGE_LEN) : Q;
-		corrections_base[i] = calculate_correction(q_search_values[i]);
 	}
 
 	for(int i=0;i<M_SRCH_RANGE_LEN;i++)
@@ -77,7 +75,7 @@ int main(void)
 			for(int q_indx=0; q_indx<Q_SRCH_RANGE_LEN; q_indx++)
 			{
 				double m;
-				struct my_f_params parameters = {c2, &corrections_base[q_indx], q_search_values[q_indx]};
+				struct my_f_params parameters = {c2, &calculate_correction, q_search_values[q_indx]};
 				F.params = &parameters;
 
 				m = find_min(&F);
