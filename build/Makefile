@@ -1,6 +1,6 @@
 CC=icc -qopenmp
-SOURCES=main.c processing.c psd.c sample_gen.c
-HEADERS=defs.h processing.h psd.h sample_gen.h
+SOURCES=main.c processing.c psd.c sample_gen.c misc.c
+HEADERS=defs.h processing.h psd.h sample_gen.h misc.h
 
 CFLAGS=-std=c99 -c -O3 -Wall -I/home/turbin_mm/.gsl/include
 LDFLAGS=-lm -lgsl -lgslcblas -L/home/turbin_mm/.gsl/lib
