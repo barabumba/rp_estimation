@@ -50,55 +50,55 @@ int main(void)
 		bw_search_values[i] = (M_SRCH_RANGE_LEN>1) ? M/2+i*(M/M_SRCH_RANGE_LEN) : M;
 	assert(bw_search_values[M_SRCH_RANGE_LEN/2] == M);
 
-	double *statistic_sum_total = (double*) calloc((Q_SRCH_RANGE_LEN), sizeof(double));
-	double *statistic_square_total = (double*) calloc((Q_SRCH_RANGE_LEN), sizeof(double));
+	double *statistic_sum_total = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
+	double *statistic_square_total = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
 
-#pragma omp parallel
+//#pragma omp parallel
 	{
 		double *c2 = (double*) malloc((N/2+1)*sizeof(double));
 
 		gsl_rng *gen = gsl_rng_alloc(gsl_rng_mt19937);
-		double *statistic_sum = (double*) calloc((Q_SRCH_RANGE_LEN), sizeof(double));
-		double *statistic_square = (double*) calloc((Q_SRCH_RANGE_LEN), sizeof(double));
+		double *statistic_sum = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
+		double *statistic_square = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
 
 		gsl_function F;
 		F.function = &process_channel_gsl;
-#pragma omp critical
+//#pragma omp critical
 		{
 			gsl_rng_set(gen, GetRandomSeed_64b());
 		}
-#pragma omp for
+//#pragma omp for
 		for(int i=0; i<NUMBER_OF_TESTS; i++)
 		{
 			GenSquaredCoefficients(gen, psd_sample_true, c2);
 
-			for(int q_indx=0; q_indx<Q_SRCH_RANGE_LEN; q_indx++)
+			for(int m_indx=0; m_indx<Q_SRCH_RANGE_LEN; m_indx++)
 			{
-				double m;
-				struct my_f_params parameters = {c2, &calculate_correction, q_search_values[q_indx]};
+				double q;
+				struct my_f_params parameters = {c2, &calculate_correction, bw_search_values[m_indx]};
 				F.params = &parameters;
 
-				m = find_min(&F);
-				statistic_sum[q_indx] += (m - M);
-				statistic_square[q_indx] += (m - M)*(m - M);
+				q = find_min(&F);
+				statistic_sum[m_indx] += (q - Q);
+				statistic_square[m_indx] += (q - Q)*(q - Q);
 			}
 		}
-#pragma omp critical
+//#pragma omp critical
 		{
-			for(int i=0;i<Q_SRCH_RANGE_LEN;i++)
+			for(int i=0;i<M_SRCH_RANGE_LEN;i++)
 			{
 				statistic_sum_total[i] += statistic_sum[i];
 				statistic_square_total[i] += statistic_square[i];
 			}
 		}
 	}
-	for(int q_indx=0; q_indx<Q_SRCH_RANGE_LEN; q_indx++)
-		printf("%f %f\n", statistic_square_total[q_indx]/NUMBER_OF_TESTS, statistic_sum_total[q_indx]/NUMBER_OF_TESTS);
+	for(int m_indx=0; m_indx<M_SRCH_RANGE_LEN; m_indx++)
+		printf("%f %f\n", statistic_square_total[m_indx]/NUMBER_OF_TESTS, statistic_sum_total[m_indx]/NUMBER_OF_TESTS);
 
 	FILE *fp;
 	fp = fopen("output.txt", "w");
 	fprintf(fp, "%d %f\n", M, Q);
-	for(int q_indx=0; q_indx<Q_SRCH_RANGE_LEN; q_indx++)
-		fprintf(fp, "%f %f %f\n", q_search_values[q_indx], statistic_square_total[q_indx]/NUMBER_OF_TESTS, statistic_sum_total[q_indx]/NUMBER_OF_TESTS);
+	for(int m_indx=0; m_indx<M_SRCH_RANGE_LEN; m_indx++)
+		fprintf(fp, "%f %f %f\n", bw_search_values[m_indx], statistic_square_total[m_indx]/NUMBER_OF_TESTS, statistic_sum_total[m_indx]/NUMBER_OF_TESTS);
 	return 0;
 }

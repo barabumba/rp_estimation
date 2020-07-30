@@ -32,9 +32,9 @@ double process_channel_gsl(double x, void *p)
 	struct my_f_params *params = (struct my_f_params *)p;
 
 	double *psd = (double*) malloc((N/2+1)*sizeof(double));
-	psd_fill(psd, N/2+1, x);
+	psd_fill(psd, N/2+1, params->m_ch);
 
-	output = process_channel(params->c2, psd, params->correction_base, params->q_ch, x);
+	output = process_channel(params->c2, psd, params->correction_base, x, params->m_ch);
 	free(psd);
 	return -output;
 }
@@ -44,29 +44,29 @@ double find_min(gsl_function *F)
 	int iter = 0, status;
 	const int max_iter = 100;
 
-	double m = M;
-	double a = m/2, b = 2*m;
+	double q = Q;
+	double a = 1e-2*q, b = 1e2*q;
 
 	double f = process_channel_gsl(a, F->params);
-	double f_m = process_channel_gsl(m, F->params);
+	double f_m = process_channel_gsl(q, F->params);
 	if(f < f_m)
 	{
 		do {
 			a /= 2;
-			m /= 2;
+			q /= 2;
 			b /= 2;
 			f = process_channel_gsl(a, F->params);
-			f_m = process_channel_gsl(m, F->params);;
+			f_m = process_channel_gsl(q, F->params);;
 		} while(f < f_m);
 	}
 	else if((f = process_channel_gsl(b, F->params)) < f_m)
 	{
 		do {
 			a *= 2;
-			m *= 2;
+			q *= 2;
 			b *= 2;
 			f = process_channel_gsl(b, F->params);
-			f_m = process_channel_gsl(m, F->params);;
+			f_m = process_channel_gsl(q, F->params);;
 		} while(f < f_m);
 	}
 
@@ -76,7 +76,7 @@ double find_min(gsl_function *F)
 	T = gsl_min_fminimizer_brent;
 	s = gsl_min_fminimizer_alloc (T);
 //	printf("%f %f %f \n", process_channel_gsl(a, F->params), process_channel_gsl(b, F->params), process_channel_gsl(m, F->params));
-	gsl_min_fminimizer_set (s, F, m, a, b);
+	gsl_min_fminimizer_set (s, F, q, a, b);
 
 //	printf ("using %s method\n",
 //			gsl_min_fminimizer_name (s));
@@ -94,7 +94,7 @@ double find_min(gsl_function *F)
 	  iter++;
 	  status = gsl_min_fminimizer_iterate (s);
 
-	  m = gsl_min_fminimizer_x_minimum (s);
+	  q = gsl_min_fminimizer_x_minimum (s);
 	  a = gsl_min_fminimizer_x_lower (s);
 	  b = gsl_min_fminimizer_x_upper (s);
 
@@ -115,5 +115,5 @@ double find_min(gsl_function *F)
 
 	if (status != GSL_SUCCESS)
 		printf ("Do not converged\n");
-	return m;
+	return q;
 }
