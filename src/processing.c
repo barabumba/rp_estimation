@@ -44,29 +44,29 @@ double find_min(gsl_function *F)
 	int iter = 0, status;
 	const int max_iter = 100;
 
-	double q = Q;
-	double a = 1e-2*q, b = 1e2*q;
+	double m = Q;
+	double a = 0.5*m, b = 2*m;
 
 	double f = process_channel_gsl(a, F->params);
-	double f_m = process_channel_gsl(q, F->params);
+	double f_m = process_channel_gsl(m, F->params);
 	if(f < f_m)
 	{
 		do {
 			a /= 2;
-			q /= 2;
+			m /= 2;
 			b /= 2;
 			f = process_channel_gsl(a, F->params);
-			f_m = process_channel_gsl(q, F->params);;
+			f_m = process_channel_gsl(m, F->params);;
 		} while(f < f_m);
 	}
 	else if((f = process_channel_gsl(b, F->params)) < f_m)
 	{
 		do {
 			a *= 2;
-			q *= 2;
+			m *= 2;
 			b *= 2;
 			f = process_channel_gsl(b, F->params);
-			f_m = process_channel_gsl(q, F->params);;
+			f_m = process_channel_gsl(m, F->params);;
 		} while(f < f_m);
 	}
 
@@ -76,7 +76,7 @@ double find_min(gsl_function *F)
 	T = gsl_min_fminimizer_brent;
 	s = gsl_min_fminimizer_alloc (T);
 //	printf("%f %f %f \n", process_channel_gsl(a, F->params), process_channel_gsl(b, F->params), process_channel_gsl(m, F->params));
-	gsl_min_fminimizer_set (s, F, q, a, b);
+	gsl_min_fminimizer_set (s, F, m, a, b);
 
 //	printf ("using %s method\n",
 //			gsl_min_fminimizer_name (s));
@@ -94,12 +94,12 @@ double find_min(gsl_function *F)
 	  iter++;
 	  status = gsl_min_fminimizer_iterate (s);
 
-	  q = gsl_min_fminimizer_x_minimum (s);
+	  m = gsl_min_fminimizer_x_minimum (s);
 	  a = gsl_min_fminimizer_x_lower (s);
 	  b = gsl_min_fminimizer_x_upper (s);
 
 	  status
-		= gsl_min_test_interval (a, b, 0.5, 0.0);
+		= gsl_min_test_interval (a, b, 0.005, 0.0);
 
 //	  if (status == GSL_SUCCESS)
 //		printf ("Converged:\n");
@@ -115,5 +115,5 @@ double find_min(gsl_function *F)
 
 	if (status != GSL_SUCCESS)
 		printf ("Do not converged\n");
-	return q;
+	return m;
 }

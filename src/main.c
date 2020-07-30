@@ -72,7 +72,7 @@ int main(void)
 		{
 			GenSquaredCoefficients(gen, psd_sample_true, c2);
 
-			for(int m_indx=0; m_indx<Q_SRCH_RANGE_LEN; m_indx++)
+			for(int m_indx=0; m_indx<M_SRCH_RANGE_LEN; m_indx++)
 			{
 				double q;
 				struct my_f_params parameters = {c2, &calculate_correction, bw_search_values[m_indx]};
