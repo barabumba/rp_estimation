@@ -53,7 +53,7 @@ int main(void)
 	double *statistic_sum_total = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
 	double *statistic_square_total = (double*) calloc((M_SRCH_RANGE_LEN), sizeof(double));
 
-//#pragma omp parallel
+#pragma omp parallel
 	{
 		double *c2 = (double*) malloc((N/2+1)*sizeof(double));
 
@@ -63,11 +63,11 @@ int main(void)
 
 		gsl_function F;
 		F.function = &process_channel_gsl;
-//#pragma omp critical
+#pragma omp critical
 		{
 			gsl_rng_set(gen, GetRandomSeed_64b());
 		}
-//#pragma omp for
+#pragma omp for
 		for(int i=0; i<NUMBER_OF_TESTS; i++)
 		{
 			GenSquaredCoefficients(gen, psd_sample_true, c2);
@@ -83,7 +83,7 @@ int main(void)
 				statistic_square[m_indx] += (q - Q)*(q - Q);
 			}
 		}
-//#pragma omp critical
+#pragma omp critical
 		{
 			for(int i=0;i<M_SRCH_RANGE_LEN;i++)
 			{
