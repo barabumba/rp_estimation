@@ -29,7 +29,7 @@ int main(void)
 
 	for(int i=0;i<M_SRCH_RANGE_LEN;i++)
 	{
-		bw_search_values[i] = (M_SRCH_RANGE_LEN>1) ? M/2+i*(M/M_SRCH_RANGE_LEN) : M;
+		bw_search_values[i] = (M_SRCH_RANGE_LEN>1) ? M_SRCH_MIN+i*((M_SRCH_MAX-M_SRCH_MIN)/M_SRCH_RANGE_LEN) : M;
 		printf("%d, ", M/2+i*(M/M_SRCH_RANGE_LEN));
 		psd_fill(psd_array[i], N/2+1, bw_search_values[i]);
 	}
@@ -42,13 +42,14 @@ int main(void)
 	{
 		double result, abserror;
 		gsl_function F;
-		q_search_values[i] = (Q_SRCH_RANGE_LEN>1) ? Q/2.+i*(1.*Q/Q_SRCH_RANGE_LEN) : Q;
+		q_search_values[i] = (Q_SRCH_RANGE_LEN>1) ? Q_SRCH_MIN+i*((Q_SRCH_MAX-Q_SRCH_MIN)/Q_SRCH_RANGE_LEN) : Q;
 		F.function = &psd_correction_log;
 		F.params = &(q_search_values[i]);
 		gsl_integration_qagi(&F, 1e-6, 1e-6, 100, giw, &result, &abserror);
 		correction_base[i] = result;
 	}
 	gsl_integration_workspace_free(giw);
+	assert(q_search_values[Q_SRCH_RANGE_LEN/2] == Q);
 
 	//omp_set_num_threads(4);
 #pragma omp parallel
