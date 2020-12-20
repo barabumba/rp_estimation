@@ -7,7 +7,7 @@
 #include "defs.h"
 
 
-double process_channel(double *c2, double *psd_ch_sample, double *correction_base, double q_ch, int64_t m_ch)
+double process_channel(double *c2, double *psd_ch_sample, double *correction_base, double q_ch, double m_ch)
 {
 	int64_t i;
 	double sum=0;
