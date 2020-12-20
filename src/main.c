@@ -15,7 +15,7 @@
 #include "misc.h"
 
 double psd_array[M_SRCH_RANGE_LEN][N/2+1];
-double correction_base[Q_SRCH_RANGE_LEN];
+double correction_base[Q_SRCH_RANGE_LEN][M_SRCH_RANGE_LEN];
 int64_t bw_search_values[M_SRCH_RANGE_LEN];
 double q_search_values[Q_SRCH_RANGE_LEN];
 double *psd_sample_true;
@@ -38,15 +38,20 @@ int main(void)
 	psd_sample_true = psd_array[M_SRCH_RANGE_LEN/2];
 
 	gsl_integration_workspace *giw = gsl_integration_workspace_alloc(100);
-	for(int i=0;i<Q_SRCH_RANGE_LEN;i++)
+	for(size_t m_indx=0;m_indx<M_SRCH_RANGE_LEN;m_indx++)
 	{
-		double result, abserror;
-		gsl_function F;
-		q_search_values[i] = (Q_SRCH_RANGE_LEN>1) ? Q_SRCH_MIN+i*((Q_SRCH_MAX-Q_SRCH_MIN)/Q_SRCH_RANGE_LEN) : Q;
-		F.function = &psd_correction_log;
-		F.params = &(q_search_values[i]);
-		gsl_integration_qagi(&F, 1e-6, 1e-6, 100, giw, &result, &abserror);
-		correction_base[i] = result;
+		for(size_t q_indx=0;q_indx<Q_SRCH_RANGE_LEN;q_indx++)
+		{
+			double result, abserror;
+			double q;
+			gsl_function F;
+			q_search_values[q_indx] = (Q_SRCH_RANGE_LEN>1) ? Q_SRCH_MIN+q_indx*((Q_SRCH_MAX-Q_SRCH_MIN)/Q_SRCH_RANGE_LEN) : Q;
+			F.function = &psd_correction_log;
+			q = q_search_values[q_indx]*M/bw_search_values[m_indx];
+			F.params = &(q);
+			gsl_integration_qagi(&F, 1e-6, 1e-6, 100, giw, &result, &abserror);
+			correction_base[q_indx][m_indx] = result;
+		}
 	}
 	gsl_integration_workspace_free(giw);
 	assert(q_search_values[Q_SRCH_RANGE_LEN/2] == Q);
@@ -76,7 +81,7 @@ int main(void)
 		{
 			for(m_indx=0;m_indx<M_SRCH_RANGE_LEN;m_indx++)
 			{
-				double channel_output = process_channel(c2, psd_array[m_indx], &correction_base[q_indx], q_search_values[q_indx], bw_search_values[m_indx]);
+				double channel_output = process_channel(c2, psd_array[m_indx], &correction_base[q_indx][m_indx], q_search_values[q_indx], bw_search_values[m_indx]);
 				gsl_matrix_set(search_field, q_indx, m_indx, channel_output);
 			}
 		}
