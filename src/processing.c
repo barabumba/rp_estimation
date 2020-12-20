@@ -11,6 +11,7 @@ double process_channel(double *c2, double *psd_ch_sample, double *correction_bas
 {
 	int64_t i;
 	double sum=0;
+	q_ch *= M/m_ch;
 	for(i=0;i<N/2+1;i++)
 	{
 		sum += c2[i]*psd_ch_sample[i]/(q_ch*psd_ch_sample[i] + 1);

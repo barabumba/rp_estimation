@@ -127,7 +127,7 @@ int64_t SaveGSLMatrtix(gsl_matrix *m, char *name)
 		if ((fprintf(fp, "\n")) < 0)
 			return -1;
     }
-    if(fprintf(fp, "%d\n", N) < 0)
+    if(fprintf(fp, "%d\n", NUMBER_OF_TESTS) < 0)
         return -1;
 
     fclose(fp);
@@ -153,7 +153,7 @@ int64_t SaveGSLMatrtixInt(gsl_matrix_int *m, char *name)
 		if ((fprintf(fp, "\n")) < 0)
 			return -1;
     }
-    if(fprintf(fp, "%d\n", N) < 0)
+    if(fprintf(fp, "%d\n", NUMBER_OF_TESTS) < 0)
         return -1;
 
     fclose(fp);
